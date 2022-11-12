@@ -1,10 +1,6 @@
 import { action, makeObservable, observable } from 'mobx'
-
-interface Todo {
-  id: number
-  description: string
-  done: boolean
-}
+import { Todo } from '../types/todo.types'
+import { getActions } from '../utils/db'
 
 class TodoStore {
   todoList: Array<Todo> = []
@@ -14,17 +10,33 @@ class TodoStore {
       todoList: observable,
       add: action,
     })
-  }
 
-  add(description: string) {
-    this.todoList.push({
-      id: this.todoList.length + 1,
-      description,
-      done: false,
+    const { getAll } = getActions<Todo>('todolist')
+
+    getAll().then((todolist) => {
+      this.todoList = [...todolist]
     })
   }
 
+  add(description: string) {
+    const { add } = getActions<Todo>('todolist')
+
+    const todo = {
+      id: this.todoList.length + 1,
+      description,
+      done: false,
+    }
+
+    add(todo)
+    this.todoList.push(todo)
+  }
+
   toggleDone(index: number) {
+    const { update } = getActions<Todo>('todolist')
+    update({
+      ...this.todoList[index],
+      done: !this.todoList[index].done,
+    })
     this.todoList[index].done = !this.todoList[index].done
   }
 }
