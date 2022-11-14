@@ -2,11 +2,11 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './styles/global.css'
-import setupIndexedDB from './utils/setupIndexedDB'
+import setupIndexedDB from './utils/indexedDB'
 
 setupIndexedDB({
   databaseName: 'Todolist database',
-  version: 1,
+  version: 9,
   stores: [
     {
       name: 'todolist',
