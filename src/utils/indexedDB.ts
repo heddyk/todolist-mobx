@@ -19,14 +19,6 @@ interface IndexedDBConfig {
   stores: IndexedDBStore[]
 }
 
-/* interface TransactionOptions {
-  storeName: string
-  dbMode: IDBTransactionMode
-  error: (e: Event) => any
-  complete: (e: Event) => any
-  abort?: any
-} */
-
 function validateStore(db: IDBDatabase, storeName: string) {
   return db.objectStoreNames.contains(storeName)
 }
@@ -37,10 +29,11 @@ export function validateBeforeTransaction(
   reject: (reason?: string) => void
 ) {
   if (!db) {
-    reject('Queried before opening connection')
+    reject('Consultado antes de abrir a conexão.')
   }
+
   if (!validateStore(db, storeName)) {
-    reject(`Store ${storeName} not found`)
+    reject(`Banco de dados ${storeName} não encontrado.`)
   }
 }
 
@@ -90,8 +83,6 @@ export async function getConnection(
       request.onupgradeneeded = (e: IDBVersionChangeEvent) => {
         const db = (e.target as IDBOpenDBRequest).result
 
-        console.log(e)
-
         config?.stores.forEach((s) => {
           if (!db.objectStoreNames.contains(s.name)) {
             const store = db.createObjectStore(s.name, s.id)
@@ -105,7 +96,7 @@ export async function getConnection(
         resolve(db)
       }
     } else {
-      reject('Failed to connect')
+      reject('Falha ao se conectar!')
     }
   })
 }
@@ -223,7 +214,7 @@ export function add<T>(currentStore: string, value: T, key?: any) {
         const objectStore = tx.objectStore(currentStore)
         const request = objectStore.add(value, key)
         request.onsuccess = (e: any) => {
-          ;(tx as any)?.commit?.()
+          tx?.commit()
           resolve(e.target.result)
         }
       })
@@ -246,7 +237,7 @@ export function update<T>(currentStore: string, value: T, key?: any) {
         const objectStore = tx.objectStore(currentStore)
         const request = objectStore.put(value, key)
         request.onsuccess = (e: any) => {
-          ;(tx as any)?.commit?.()
+          tx?.commit()
           resolve(e.target.result)
         }
       })
@@ -259,6 +250,7 @@ export function deleteByID(currentStore: string, id: any) {
     getConnection()
       .then((db) => {
         validateBeforeTransaction(db, currentStore, reject)
+
         const tx = createTransaction(
           db,
           'readwrite',
@@ -266,10 +258,13 @@ export function deleteByID(currentStore: string, id: any) {
           resolve,
           reject
         )
+
         const objectStore = tx.objectStore(currentStore)
+
         const request = objectStore.delete(id)
+
         request.onsuccess = (e: any) => {
-          ;(tx as any)?.commit?.()
+          tx?.commit()
           resolve(e)
         }
       })
@@ -282,6 +277,7 @@ export function deleteAll(currentStore: string) {
     getConnection()
       .then((db) => {
         validateBeforeTransaction(db, currentStore, reject)
+
         const tx = createTransaction(
           db,
           'readwrite',
@@ -289,10 +285,13 @@ export function deleteAll(currentStore: string) {
           resolve,
           reject
         )
+
         const objectStore = tx.objectStore(currentStore)
+
         const request = objectStore.clear()
+
         request.onsuccess = (e: any) => {
-          ;(tx as any)?.commit?.()
+          tx?.commit()
           resolve(e)
         }
       })

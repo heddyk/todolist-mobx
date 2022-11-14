@@ -1,7 +1,7 @@
 import { action, makeObservable, observable } from 'mobx'
+import { v4 as uuidV4 } from 'uuid'
 import { Todo } from '../types/todo.types'
 import { add, getAll, update } from '../utils/indexedDB'
-
 class TodoStore {
   todoList: Array<Todo> = []
 
@@ -22,7 +22,7 @@ class TodoStore {
 
   async add(description: string) {
     const todo = {
-      id: this.todoList.length + 1,
+      id: uuidV4(),
       description,
       done: false,
     }
